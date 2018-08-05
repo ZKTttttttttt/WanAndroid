@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/mine.css" rel="stylesheet" />
+		<script src="../js/vue.js"></script>
+	</head>
+
+	<body>
+		<div id="content">
+			<header class="mui-bar mui-bar-nav toolbar-bg">
+				<a class="mui-action-back mui-icon mui-icon-back mui-pull-left text-white" style="width: 15%;"></a>
+				<div class="mui-input-row mui-search" style="display: inline-block;width: 85%;">
+					<input v-model="inputkey" type="search" class="mui-input-clear" placeholder="请输入关键字" style="background: white;border-radius: 20px;">
+				</div>
+			</header>
+			<div class="mui-content white">
+				<div style="padding: 14px;">
+					<button :class="{'mui-btn mui-btn-primary':true,'mui-btn-outlined':item.isActive}" v-for="item of labels" style="margin: 6px;border-radius: 20px;" @click="search(item)">{{item.name}}</button>
+				</div>
+
+				<!--列表-->
+				<div id="pulltorefresh" class="mui-content mui-scroll-wrapper">
+					<div class="mui-scroll">
+						<ul class="mui-table-view">
+							<li class="mui-table-view-cell" v-for="item of mainlists" @click="openDetail(item)">
+								<div class="mui-card">
+									<div class="mui-card-content mui-card-content-inner">
+										<div class="vertical">
+											<img src="../imgs/muwu.jpg" class="round_icon mui-pull-left"></img>
+											<a class="mui-card-link">{{item.author}}</a>
+											<a class="mui-card-link mui-pull-right">{{item.niceDate}}</a>
+										</div>
+										<p class="padding-vertical">{{item.title}}</p>
+										<div class="vertical">
+											<a class="mui-card-link">{{item.superChapterName}}</a>
+											<img src="../imgs/icon_like_y.svg" class="mui-pull-right vertical-img" />
+											</a>
+										</div>
+									</div>
+							</li>
+						</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				pullRefresh: {
+					container: '#pulltorefresh',
+					up: {
+						auto: true,
+						contentrefresh: '正在加载...',
+						callback: pullupRefresh
+					}
+				}
+			});
+
+			var count = 0;
+
+			function pullupRefresh() {
+				if(count > 0) {
+					getListData(vue.keyword);
+				}
+			}
+
+			function getListData(keyword) {
+				setTimeout(function() {
+					mui.post('http://www.wanandroid.com/article/query/' + count + '/json', {
+						k: keyword
+					}, function(data) {
+						if(data.errorCode == 0) {
+							if(count == 0) {
+								vue.mainlists = [];
+							}
+							vue.mainlists = vue.mainlists.concat(data.data.datas);
+							if(data.data.datas.length == 0) {
+								mui('#pulltorefresh').pullRefresh().disablePullupToRefresh();
+							} else {
+								mui('#pulltorefresh').pullRefresh().enablePullupToRefresh();
+							}
+							mui('#pulltorefresh').pullRefresh().endPullupToRefresh();
+							count++;
+						}
+					}, 'json');
+				}, 10);
+			}
+
+			mui.get('http://www.wanandroid.com/hotkey/json', {}, function(data) {
+				if(data.errorCode == 0) {
+					vue.labels = data.data;
+					for(var i = 0; i < vue.labels.length; i++) {
+						vue.labels[i].isActive = true;
+					}
+					getListData();
+				}
+			}, 'json');
+
+			var vue = new Vue({
+				el: '#content',
+				data: {
+					labels: [],
+					mainlists: [],
+					keyword: '',
+					inputkey: ''
+				},
+				methods: {
+					openDetail: function(item) {
+						mui.openWindow({
+							url: 'pagedetail.html',
+							id: 'newwindow',
+							extras: {
+								url: item.link
+							}
+						});
+					},
+					search: function(item) {
+						count = 0;
+						for(var i = 0; i < this.labels.length; i++) {
+							this.labels[i].isActive = true;
+						}
+						item.isActive = !item.isActive;
+						this.keyword = item.name;
+						getListData(item.name);
+					}
+				},
+				watch: {
+					inputkey: function() {
+						count = 0;
+						this.keyword = this.inputkey;
+						getListData(this.inputkey);
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>

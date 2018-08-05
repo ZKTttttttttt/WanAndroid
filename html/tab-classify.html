@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>mui选项卡切换和下拉刷新加载数据列表代码</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="../css/mui.min.css">
+		<link rel="stylesheet" href="../css/mine.css" />
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/mui.pullToRefresh.js"></script>
+		<script src="../js/mui.pullToRefresh.material.js"></script>
+		<script src="../js/handlebars-v4.0.11.js"></script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav toolbar-bg">
+			<h1 id="title" class="mui-title text-white">分类</h1>
+			<a class="mui-action-menu mui-icon mui-icon-search mui-pull-right text-white" onclick="openSearch()"></a>
+		</header>
+		<div class="mui-content" id="content">
+			<div id="slider" class="mui-slider mui-fullscreen">
+				<div id="sliderSegmentedControl" class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+					<div id="tabs" class="mui-scroll">
+						<!--tabs菜单-->
+					</div>
+				</div>
+				<div id="pages" class="mui-slider-group">
+					<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
+						<div class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+								<ul class="mui-table-view">
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script id="tab" type="text/x-handlebars-template">
+			{{#each this}}
+			<a class="mui-control-item {{#isFirst  @index}} mui-active{{/isFirst}}" href="#{{this.id}}">
+				{{this.name}}
+			</a>
+			{{/each}}
+		</script>
+
+		<script id="page" type="text/x-handlebars-template">
+			{{#each this}}
+			<div id="{{this.id}}" class="mui-slider-item mui-control-content {{#isFirst @index}}mui-active{{/isFirst}}">
+				<div class="mui-scroll-wrapper">
+					<div class="mui-scroll">
+						<ul class="mui-table-view">
+						</ul>
+					</div>
+				</div>
+			</div>
+			{{/each}}
+		</script>
+
+		<script id="listview" type="text/x-handlebars-template">
+			{{#each this}}
+			<li class="mui-table-view-cell" onclick="openDetail(this)"  data-url='{{this.link}}'>
+				<div class="mui-card">
+					<div class="mui-card-content mui-card-content-inner">
+						<div class="vertical">
+							<img src="../imgs/muwu.jpg" class="round_icon mui-pull-left" style="width: 20px;height: 20px;"></img>
+							<a class="mui-card-link">{{this.author}}</a>
+							<a class="mui-card-link mui-pull-right">{{this.niceDate}}</a>
+						</div>
+						<p class="padding-vertical">{{this.title}}</p>
+						<div class="vertical" style="width: 100%;height: 20px;line-height: 20px;">
+							<a class="mui-card-link">{{this.superChapterName}}</a>
+							<img src="../imgs/icon_like_y.svg" class="mui-pull-right vertical-img" style="width: 20px;height: 20px;" />
+						</div>
+					</div>
+			</li>
+			{{/each}}
+		</script>
+
+		<script>
+			mui.init();
+			Handlebars.registerHelper('isFirst', function(value, options) {
+				if(value == 0) {
+					return options.fn(this);
+				} else {
+					return options.inverse(this);
+				}
+
+			});
+
+			var txlist; //知识体系
+			var index = 0; //具体知识体系的index
+			var smallindex; //具体知识体系的下知识点的index
+			var pageNums; //具体知识体列表页数数组
+			var noDatas; //无更多数据
+			var hasInits; //页面是否已经初始化
+
+			mui.get('http://www.wanandroid.com/tree/json', {}, function(data) {
+				if(data.errorCode == 0) {
+					txlist = data.data;
+					pageNums = new Array();
+					noDatas = new Array();
+					smallindex = new Array();
+					hasInits = new Array();
+
+					//渲染tabs
+					var t = document.getElementById('tab').innerHTML;
+					var f = Handlebars.compile(t);
+					var h = f(data.data);
+					document.getElementById('tabs').innerHTML = h;
+					//渲染tabs对应的页面
+					var t1 = document.getElementById('page').innerHTML;
+					var f1 = Handlebars.compile(t1);
+					var h1 = f1(data.data);
+					document.getElementById('pages').innerHTML = h1;
+				}
+			}, 'json');
+
+			setTimeout(function() {
+				(function($) {
+					//阻尼系数
+					var deceleration = mui.os.ios ? 0.003 : 0.0009;
+					$('.mui-scroll-wrapper').scroll({
+						bounce: false,
+						indicators: true, //是否显示滚动条
+						deceleration: deceleration
+					});
+					$.ready(function() {
+						//循环初始化所有下拉刷新，上拉加载。
+						$.each(document.querySelectorAll('.mui-slider-group .mui-scroll'), function(index, pullRefreshEl) {
+
+							pageNums.push(0);
+							noDatas.push(false);
+							smallindex.push(0);
+							hasInits.push(false);
+
+							$(pullRefreshEl).pullToRefresh({
+								//								down: {
+								//									callback: function() {
+								//										var self = this;
+								//										setTimeout(function() {
+								//											var ul = self.element.querySelector('.mui-table-view');
+								//											getData((txlist[index].children)[0].id,false);
+								//											self.endPullDownToRefresh();
+								//										}, 1000);
+								//									}
+								//								},
+								up: {
+									callback: function() {
+										var self = this;
+										setTimeout(function() {
+											var ul = self.element.querySelector('.mui-table-view');
+											getData((txlist[index].children)[smallindex[index]].id, true);
+											self.endPullUpToRefresh(noDatas[index]);
+										}, 1000);
+									}
+								}
+							});
+						});
+					});
+				})(mui);
+
+				getData((txlist[index].children)[smallindex[index]].id);
+				pageNums[index] = pageNums[index] + 1; //第一页第一次上拉pageNum为1
+				hasInits[0] = true;
+
+			}, 1000);
+
+			document.getElementById('slider').addEventListener('slide', function(e) {
+				index = e.detail.slideNumber;
+				if(hasInits[index] === false) {
+					getData((txlist[index].children)[smallindex[index]].id, false);
+					hasInits[index] = true;
+				}
+			});
+
+			function getData(id, isUp) {
+				if(!isUp) {
+					pageNums[index] = 0;
+					noDatas[index] = false;
+				}
+				mui.get('http://www.wanandroid.com/article/list/' + pageNums[index] + '/json?cid=' + id, {}, function(data) {
+					if(data.errorCode == 0) {
+						if(data.data.datas.length == 0) {
+							if((txlist[index].children.length - 1) > smallindex[index]) {
+								smallindex[index] = smallindex[index] + 1;
+								pageNums[index] = 0;
+								getData((txlist[index].children)[smallindex[index]].id, true);
+							} else {
+								noDatas[index] = true;
+							}
+						} else {
+							//渲染tabs
+							var t = document.getElementById('listview').innerHTML;
+							var f = Handlebars.compile(t);
+							var h = f(data.data.datas);
+							var self = document.querySelector('.mui-slider-group .mui-active .mui-scroll .mui-table-view');
+							self.innerHTML = isUp ? (self.innerHTML + h) : h;
+							if(isUp) {
+								pageNums[index]++;
+							}
+						}
+					}
+				}, 'json');
+			}
+
+			function openDetail(item) {
+				mui.openWindow({
+					url: 'pagedetail.html',
+					id: 'zstxdetail',
+					extras: {
+						url: item.getAttribute("data-url")
+					}
+				});
+			}
+			
+			
+			
+			function  openSearch(){
+				mui.openWindow({
+						url: 'search.html',
+						id: 'search',
+					});
+		}
+		</script>
+
+	</body>
+
+</html>

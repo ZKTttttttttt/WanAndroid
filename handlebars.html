@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/handlebars-v4.0.11.js"></script>
+		<style>
+			.lable {
+				font-size: 16px;
+			}
+			
+			.hint {
+				color: gray;
+				font-size: 14px;
+			}
+			
+			.gray {
+				color: gray;
+			}
+			
+			.red {
+				color: red;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-back mui-pull-left"></a>
+			<h4 class="mui-title">Handlebars实例</h4>
+			<a class="mui-icon mui-icon-camera mui-action-menu mui-pull-right"></a>
+		</header>
+		<div id="pulltorefresh" class="mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+				<ul class="mui-table-view" id="ul">
+
+				</ul>
+			</div>
+		</div>
+
+		<script id="listview" type="text/x-handlebars-template">
+			{{#each this}}
+			<li class="mui-table-view-cell mui-media">
+				<a href="javascript:;">
+					<img src={{img}} class="mui-media-object mui-pull-left" />
+					<div class="mui-media-body">
+						<label class="lable">{{title}}{{chinese  @index}}</label> {{#if time}}<span class="mui-pull-right hint">{{time}}</span>{{/if}}
+						<br/>
+						<label class="hint">{{contact}}</label>
+						<span class="mui-icon mui-icon-micoff mui-pull-right {{#isFirst  @index}} red {{/isFirst}}" />
+					</div>
+				</a>
+			</li>
+			{{/each}}
+		</script>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				pullRefresh: {
+					container: '#pulltorefresh',
+					down: {
+						style: 'circle',
+						callback: pulldownRefresh
+					},
+					up: {
+						auto: true,
+						contentrefresh: '正在加载...',
+						callback: pullupRefresh
+					}
+
+				}
+			});
+
+			Handlebars.registerHelper('isFirst', function(value, options) {
+				if(value == 0) {
+					return options.fn(this);
+				} else {
+					return options.inverse(this);
+				}
+
+			});
+			Handlebars.registerHelper('chinese', function(value) {
+				return '(' + (value + 1) + ')';
+			});
+
+			var data = [{
+					img: "imgs/muwu.jpg",
+					title: "安卓开发艺术探索",
+					contact: "任玉刚：我是主席",
+					time: "下午4:00"
+				},
+				{
+					img: "imgs/muwu.jpg",
+					title: "安卓开发艺术探索",
+					contact: "任玉刚：我是主席"
+				},
+				{
+					img: "imgs/muwu.jpg",
+					title: "安卓开发艺术探索",
+					contact: "任玉刚：我是主席",
+					time: "下午4:00"
+				},
+				{
+					img: "imgs/muwu.jpg",
+					title: "安卓开发艺术探索",
+					contact: "任玉刚：我是主席",
+					time: "下午4:00"
+				},
+				{
+					img: "imgs/muwu.jpg",
+					title: "安卓开发艺术探索",
+					contact: "任玉刚：我是主席",
+
+				}
+			];
+
+			function pulldownRefresh() {
+				count = 0;
+				setTimeout(function() {
+					mui.toast(count);
+					var t = document.getElementById('listview').innerHTML;
+					var f = Handlebars.compile(t);
+					var h = f(data);
+					document.getElementById('ul').innerHTML = h;
+					mui('#pulltorefresh').pullRefresh().endPulldownToRefresh();
+					mui('#pulltorefresh').pullRefresh().endPullupToRefresh(false);
+				}, 500);
+			}
+
+			var count = 0;
+
+			function pullupRefresh() {
+				setTimeout(function() {
+					var t = document.getElementById('listview').innerHTML;
+					var f = Handlebars.compile(t);
+					var h = f(data);
+					document.getElementById('ul').innerHTML += h;
+					mui('#pulltorefresh').pullRefresh().endPullupToRefresh(count > 3);
+					count++;
+					mui.toast(count);
+				}, 500);
+			}
+		</script>
+	</body>
+
+</html>

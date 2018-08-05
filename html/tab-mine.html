@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="referrer" content="no-referrer">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/vue.js"></script>
+		<script src="../js/mui.previewimage.js"></script>
+		<script src="../js/mui.zoom.js"></script>
+		<link rel="stylesheet" href="../css/mui.min.css">
+		<link rel="stylesheet" href="../css/mine.css" />
+		<style type="text/css">
+			.mui-preview-image.mui-fullscreen {
+				position: fixed;
+				z-index: 20;
+				background-color: #000;
+			}
+			
+			.mui-preview-header,
+			.mui-preview-footer {
+				position: absolute;
+				width: 100%;
+				left: 0;
+				z-index: 10;
+			}
+			
+			.mui-preview-header {
+				height: 44px;
+				top: 0;
+			}
+			
+			.mui-preview-footer {
+				height: 50px;
+				bottom: 0px;
+			}
+			
+			.mui-preview-header .mui-preview-indicator {
+				display: block;
+				line-height: 25px;
+				color: #fff;
+				text-align: center;
+				margin: 15px auto 4;
+				width: 70px;
+				background-color: rgba(0, 0, 0, 0.4);
+				border-radius: 12px;
+				font-size: 16px;
+			}
+			
+			.mui-preview-image {
+				display: none;
+				-webkit-animation-duration: 0.5s;
+				animation-duration: 0.5s;
+				-webkit-animation-fill-mode: both;
+				animation-fill-mode: both;
+			}
+			
+			.mui-preview-image.mui-preview-in {
+				-webkit-animation-name: fadeIn;
+				animation-name: fadeIn;
+			}
+			
+			.mui-preview-image.mui-preview-out {
+				background: none;
+				-webkit-animation-name: fadeOut;
+				animation-name: fadeOut;
+			}
+			
+			.mui-preview-image.mui-preview-out .mui-preview-header,
+			.mui-preview-image.mui-preview-out .mui-preview-footer {
+				display: none;
+			}
+			
+			.mui-zoom-scroller {
+				position: absolute;
+				display: -webkit-box;
+				display: -webkit-flex;
+				display: flex;
+				-webkit-box-align: center;
+				-webkit-align-items: center;
+				align-items: center;
+				-webkit-box-pack: center;
+				-webkit-justify-content: center;
+				justify-content: center;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				-webkit-backface-visibility: hidden;
+			}
+			
+			.mui-zoom {
+				-webkit-transform-style: preserve-3d;
+				transform-style: preserve-3d;
+			}
+			
+			.mui-slider .mui-slider-group .mui-slider-item img {
+				width: auto;
+				height: auto;
+				max-width: 100%;
+				max-height: 100%;
+			}
+			
+			.mui-android-4-1 .mui-slider .mui-slider-group .mui-slider-item img {
+				width: 100%;
+			}
+			
+			.mui-android-4-1 .mui-slider.mui-preview-image .mui-slider-group .mui-slider-item {
+				display: inline-table;
+			}
+			
+			.mui-android-4-1 .mui-slider.mui-preview-image .mui-zoom-scroller img {
+				display: table-cell;
+				vertical-align: middle;
+			}
+			
+			.mui-preview-loading {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				display: none;
+			}
+			
+			.mui-preview-loading.mui-active {
+				display: block;
+			}
+			
+			.mui-preview-loading .mui-spinner-white {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin-left: -25px;
+				margin-top: -25px;
+				height: 50px;
+				width: 50px;
+			}
+			
+			.mui-preview-image img.mui-transitioning {
+				-webkit-transition: -webkit-transform 0.5s ease, opacity 0.5s ease;
+				transition: transform 0.5s ease, opacity 0.5s ease;
+			}
+			
+			@-webkit-keyframes fadeIn {
+				0% {
+					opacity: 0;
+				}
+				100% {
+					opacity: 1;
+				}
+			}
+			
+			@keyframes fadeIn {
+				0% {
+					opacity: 0;
+				}
+				100% {
+					opacity: 1;
+				}
+			}
+			
+			@-webkit-keyframes fadeOut {
+				0% {
+					opacity: 1;
+				}
+				100% {
+					opacity: 0;
+				}
+			}
+			
+			@keyframes fadeOut {
+				0% {
+					opacity: 1;
+				}
+				100% {
+					opacity: 0;
+				}
+			}
+			
+			p img {
+				max-width: 100%;
+				height: auto;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav toolbar-bg">
+			<h1 id="title" class="mui-title text-white">福利</h1>
+			<a class="mui-action-menu mui-icon mui-icon-help mui-pull-right text-white" onclick="openAbout()"></a>
+		</header>
+		<div class="mui-content">
+			<!--列表-->
+			<div id="pulltorefresh" class="mui-content mui-scroll-wrapper">
+				<div class="mui-scroll">
+					<ul id="listview" class="mui-table-view mui-grid-view">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		mui.init({
+			pullRefresh: {
+				container: '#pulltorefresh',
+				down: {
+					style: 'circle',
+					callback: pulldownRefresh
+				},
+				up: {
+					auto: true,
+					contentrefresh: '正在加载...',
+					callback: pullupRefresh
+				}
+			}
+		});
+
+		mui.previewImage();
+
+		var count = 1;
+
+		function pulldownRefresh() {
+			count = 1;
+			getListData(false);
+		}
+
+		function pullupRefresh() {
+			getListData(true);
+		}
+
+		function getListData(isUp) {
+			setTimeout(function() {
+				console.log('http://gank.io/api/data/福利/10/' + count);
+				mui.get('http://gank.io/api/data/福利/10/' + count, {}, function(data) {
+					if(!data.error) {
+						if(isUp) {
+							addData(data.results);
+							mui('#pulltorefresh').pullRefresh().endPullupToRefresh();
+						} else {
+							addData(data.results);
+							mui('#pulltorefresh').pullRefresh().endPulldownToRefresh();
+						}
+						count++;
+					}
+				}, 'json');
+			}, 100);
+		}
+
+		function addData(data,isUp) {
+			for(var i = 0; i < data.length; i++) {
+				var li = document.createElement('li');
+				li.className = 'mui-table-view-cell mui-media ';
+				var a = document.createElement('div');
+				a.className = 'mui-card mui-card-content-inner img-padding';
+				var img = document.createElement('img');
+				img.className = 'mui-media-objec';
+				img.setAttribute("src", data[i].url);
+				img.setAttribute('data-preview-src', '')
+				img.setAttribute('data-preview-group', '1')
+				img.style.width = '100%';
+				img.style.height = '30%';
+
+                var footer=document.createElement('div');
+                footer.style.paddingLeft='10px';
+                footer.style.paddingRight='10px';
+                
+				var text = document.createElement('h5');
+				text.className='mui-pull-left';
+				text.style.paddingLeft='20';
+				text.style.color='#007AFF';
+				text.innerText = data[i].desc;
+				
+				var like = document.createElement('img');
+				like.style.paddingRight='20';
+				like.className = 'mui-pull-right vertical-img';
+				like.setAttribute("src", '../imgs/icon_like_y.svg');
+				
+				footer.appendChild(text);
+				footer.appendChild(like);
+				
+				a.appendChild(img);
+				a.appendChild(footer);
+				li.appendChild(a);
+				document.getElementById('listview').appendChild(li);
+			}
+		}
+		
+		function openAbout(){
+			mui.openWindow({
+				url: 'info.html',
+				id: 'about',
+			});
+		}
+	</script>
+
+</html>

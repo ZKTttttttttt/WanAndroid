@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="referrer" content="no-referrer">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/vue.js"></script>
+		<link rel="stylesheet" href="../css/mui.min.css">
+		<link rel="stylesheet" href="../css/mine.css" />
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav toolbar-bg">
+			<h1 id="title" class="mui-title text-white">首页</h1>
+			<a class="mui-action-menu mui-icon mui-icon-search mui-pull-right text-white" onclick="openSearch()"></a>
+		</header>
+		<div class="mui-content white">
+			<!--轮播-->
+			<div id="slider" class="mui-slider  banner ">
+				<div id="banner" class="mui-slider-group mui-slider-loop">
+				</div>
+				<div id="indicators" class="mui-slider-indicator ">
+				</div>
+			</div>
+			<!--列表-->
+			<div id="pulltorefresh" class="mui-content mui-scroll-wrapper">
+				<div class="mui-scroll">
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell" v-for="item of mainlists" @click="openDetail(item)">
+							<div class="mui-card">
+								<div class="mui-card-content mui-card-content-inner">
+									<div class="vertical">
+										<img src="../imgs/muwu.jpg" class="round_icon mui-pull-left"></img>
+										<a class="mui-card-link">{{item.author}}</a>
+										<a class="mui-card-link mui-pull-right">{{item.niceDate}}</a>
+									</div>
+									<p class="padding-vertical">{{item.title}}</p>
+									<div class="vertical">
+										<a class="mui-card-link">{{item.superChapterName}}</a>
+										<img src="../imgs/icon_like_y.svg" class="mui-pull-right vertical-img" />
+									</div>
+								</div>
+						</li>
+					</ul>
+					</div>
+				</div>
+			</div>
+	</body>
+	<script>
+		mui.init({
+			pullRefresh: {
+				container: '#pulltorefresh',
+				down: {
+					style: 'circle',
+					callback: pulldownRefresh
+				},
+				up: {
+					auto: true,
+					contentrefresh: '正在加载...',
+					callback: pullupRefresh
+				}
+			}
+		});
+
+		var count = 0;
+
+		function pulldownRefresh() {
+			count = 0;
+			getListData(false);
+		}
+
+		function pullupRefresh() {
+			getListData(true);
+		}
+
+		function getListData(isUp) {
+			setTimeout(function() {
+				mui.get('http://www.wanandroid.com/article/list/' + count + '/json', {}, function(data) {
+					if(data.errorCode == 0) {
+						if(isUp) {
+							vue.mainlists = vue.mainlists.concat(data.data.datas);
+							mui('#pulltorefresh').pullRefresh().endPullupToRefresh();
+						} else {
+							vue.mainlists = data.data.datas;
+							mui('#pulltorefresh').pullRefresh().endPulldownToRefresh();
+						}
+						count++;
+					}
+				}, 'json');
+			}, 10);
+		}
+
+		var banners;
+		var s;
+		mui.get('http://www.wanandroid.com/banner/json', {}, function(data) {
+			if(data.errorCode == 0) {
+				banners = data.data;
+				for(var i = 0; i < banners.length + 2; i++) {
+					var div = document.createElement('div');
+					div.setAttribute("id", Math.floor(Math.random() * 100));
+					if(i == 0 || i == banners.length + 1) {
+						div.className = 'mui-slider-item mui-slider-item-duplicate';
+					} else {
+						div.className = 'mui-slider-item';
+					}
+					var a = document.createElement('a');
+					a.setAttribute("href", '#');
+					var img = document.createElement('img');
+					if(i == 0) {
+						img.setAttribute("src", banners[banners.length - 1].imagePath);
+					} else if(i == banners.length + 1) {
+						img.setAttribute("src", banners[0].imagePath);
+					} else {
+						img.setAttribute("src", banners[i - 1].imagePath);
+					}
+					a.appendChild(img);
+					div.appendChild(a);
+					document.getElementById('banner').appendChild(div);
+
+					if(i < banners.length) {
+						var ind = document.createElement('div');
+						ind.className = i == 0 ? 'mui-indicator mui-active' : 'mui-indicator';
+						document.getElementById('indicators').appendChild(ind)
+					}
+					var slider = mui("#slider");
+					slider.slider({
+						interval: 3000
+					});
+				}
+
+			}
+		}, 'json');
+
+		var vue = new Vue({
+			el: '#pulltorefresh',
+			data: {
+				mainlists: []
+			},
+			methods: {
+				openDetail: function(item) {
+					mui.openWindow({
+						url: 'pagedetail.html',
+						id: 'newwindow',
+						extras: {
+							url: item.link
+						}
+					});
+				}
+			}
+		});
+
+		function openSearch() {
+			mui.openWindow({
+				url: 'search.html',
+				id: 'search',
+			});
+		}
+	</script>
+
+</html>
