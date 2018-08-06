@@ -8,7 +8,7 @@
 <img src="screenshots/shot5.jpg" width = "30%" /> 
 
 
-## [下载Demo](https://fir.im/wanandroi)
+## [下载](https://fir.im/wanandroi)
 <img src="screenshots/download.png" width = "30%" />
 
 ## Api来自WanAndroid和干货集中营
