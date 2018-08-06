@@ -14,12 +14,12 @@
 		<div id="content">
 			<header class="mui-bar mui-bar-nav toolbar-bg">
 				<a class="mui-action-back mui-icon mui-icon-back mui-pull-left text-white" style="width: 15%;"></a>
-				<div class="mui-input-row mui-search" style="display: inline-block;width: 85%;">
-					<input v-model="inputkey" type="search" class="mui-input-clear" placeholder="请输入关键字" style="background: white;border-radius: 20px;">
+				<div class="mui-input-row mui-search" style="display: inline-block;width: 85%;height: 40px;">
+					<input v-model="inputkey" type="search" class="mui-input-clear" placeholder="请输入关键字" style="background: white;border-radius: 20px;height: 30px;">
 				</div>
 			</header>
 			<div class="mui-content white">
-				<div style="padding: 14px;">
+				<div style="padding: 14px;margin-top: 10px;">
 					<button :class="{'mui-btn mui-btn-primary':true,'mui-btn-outlined':item.isActive}" v-for="item of labels" style="margin: 6px;border-radius: 20px;" @click="search(item)">{{item.name}}</button>
 				</div>
 

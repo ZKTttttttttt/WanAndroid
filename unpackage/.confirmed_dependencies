@@ -1,53 +1,54 @@
 {
-	"html/tab-webview-main.html": {
-		"resources": [
-			"html/tab-webview-subpage-about.html"
-		],
-		"refer": [
-			"html/tab-webview-subpage-setting.html",
-			"html/tab-webview-subpage-chat.html",
-			"html/tab-webview-subpage-contact.html",
-			"html/tab-webview-subpage-about.html"
-		]
-	},
-	"html/main.html": {
-		"resources": [
-			"html/tab-main.html",
-			"html/tab-mine.html"
-		],
-		"refer": [
-			"html/tab-main.html",
-			"html/tab-mine.html",
-			"html/tab-classify.html",
-			"html/js/tab-classify.html"
-		]
-	},
-	"html/tab-main.html": {
-		"resources": [
-			"css/mui.min.css",
-			"imgs/icon_like_n.svg"
-		],
-		"refer": [
-			"html/pagedetail.html",
-			"html/search.html",
-			"html/info.html"
-		]
-	},
-	"html/tab-classify.html": {
-		"refer": [
-			"html/pagedetail.html",
-			"html/pagedetail1.html",
-			"html/search.html"
-		]
-	},
-	"html/search.html": {
-		"refer": [
-			"html/pagedetail.html"
-		]
-	},
-	"html/tab-mine.html": {
-		"refer": [
-			"html/info.html"
-		]
-	}
+  "html/tab-webview-main.html": {
+    "resources": [
+      "html/tab-webview-subpage-about.html"
+    ],
+    "refer": [
+      "html/tab-webview-subpage-setting.html",
+      "html/tab-webview-subpage-chat.html",
+      "html/tab-webview-subpage-contact.html",
+      "html/tab-webview-subpage-about.html"
+    ]
+  },
+  "html/main.html": {
+    "resources": [
+      "html/tab-main.html",
+      "html/tab-mine.html"
+    ],
+    "refer": [
+      "html/tab-main.html",
+      "html/tab-mine.html",
+      "html/tab-classify.html",
+      "html/js/tab-classify.html"
+    ]
+  },
+  "html/tab-main.html": {
+    "resources": [
+      "css/mui.min.css",
+      "imgs/icon_like_n.svg"
+    ],
+    "refer": [
+      "html/pagedetail.html",
+      "html/search.html",
+      "html/info.html",
+      "html/nav_transparent.html"
+    ]
+  },
+  "html/tab-classify.html": {
+    "refer": [
+      "html/pagedetail.html",
+      "html/pagedetail1.html",
+      "html/search.html"
+    ]
+  },
+  "html/search.html": {
+    "refer": [
+      "html/pagedetail.html"
+    ]
+  },
+  "html/tab-mine.html": {
+    "refer": [
+      "html/info.html"
+    ]
+  }
 }

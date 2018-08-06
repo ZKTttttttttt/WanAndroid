@@ -16,6 +16,8 @@
 }
 
 .toolbar-bg {
+	height: 60px;
+	padding-top: 20px;
 	background-color: cornflowerblue;
 }
 
@@ -132,4 +134,8 @@
 
 .img-padding{
 	padding: 3px;
+}
+
+.margin-top-10{
+	margin-top: 10px;
 }

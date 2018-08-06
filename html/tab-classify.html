@@ -21,7 +21,7 @@
 			<a class="mui-action-menu mui-icon mui-icon-search mui-pull-right text-white" onclick="openSearch()"></a>
 		</header>
 		<div class="mui-content" id="content">
-			<div id="slider" class="mui-slider mui-fullscreen">
+			<div id="slider" class="mui-slider mui-fullscreen" style="padding-top: 20px;">
 				<div id="sliderSegmentedControl" class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
 					<div id="tabs" class="mui-scroll">
 						<!--tabs菜单-->
@@ -49,7 +49,7 @@
 
 		<script id="page" type="text/x-handlebars-template">
 			{{#each this}}
-			<div id="{{this.id}}" class="mui-slider-item mui-control-content {{#isFirst @index}}mui-active{{/isFirst}}">
+			<div id="{{this.id}}" class="mui-slider-item mui-control-content {{#isFirst @index}}mui-active{{/isFirst}} margin-top-10">
 				<div class="mui-scroll-wrapper">
 					<div class="mui-scroll">
 						<ul class="mui-table-view">
@@ -62,7 +62,7 @@
 
 		<script id="listview" type="text/x-handlebars-template">
 			{{#each this}}
-			<li class="mui-table-view-cell" onclick="openDetail(this)"  data-url='{{this.link}}'>
+			<li class="mui-table-view-cell" onclick="openDetail(this)" data-url='{{this.link}}'>
 				<div class="mui-card">
 					<div class="mui-card-content mui-card-content-inner">
 						<div class="vertical">
@@ -93,18 +93,14 @@
 
 			var txlist; //知识体系
 			var index = 0; //具体知识体系的index
-			var smallindex; //具体知识体系的下知识点的index
-			var pageNums; //具体知识体列表页数数组
-			var noDatas; //无更多数据
-			var hasInits; //页面是否已经初始化
+			var smallindex = new Array(); //具体知识体系的下知识点的index
+			var pageNums = new Array(); //具体知识体列表页数数组
+			var noDatas = new Array(); //无更多数据
+			var hasInits = new Array(); //页面是否已经初始化
 
 			mui.get('http://www.wanandroid.com/tree/json', {}, function(data) {
 				if(data.errorCode == 0) {
 					txlist = data.data;
-					pageNums = new Array();
-					noDatas = new Array();
-					smallindex = new Array();
-					hasInits = new Array();
 
 					//渲染tabs
 					var t = document.getElementById('tab').innerHTML;
@@ -116,58 +112,53 @@
 					var f1 = Handlebars.compile(t1);
 					var h1 = f1(data.data);
 					document.getElementById('pages').innerHTML = h1;
+					
+					//渲染tabs对应的页面
+					initPages();
 				}
 			}, 'json');
 
-			setTimeout(function() {
-				(function($) {
-					//阻尼系数
-					var deceleration = mui.os.ios ? 0.003 : 0.0009;
-					$('.mui-scroll-wrapper').scroll({
-						bounce: false,
-						indicators: true, //是否显示滚动条
-						deceleration: deceleration
-					});
-					$.ready(function() {
-						//循环初始化所有下拉刷新，上拉加载。
-						$.each(document.querySelectorAll('.mui-slider-group .mui-scroll'), function(index, pullRefreshEl) {
+			function initPages() {
+				setTimeout(function() {
+					(function($) {
+						//阻尼系数
+						var deceleration = mui.os.ios ? 0.003 : 0.0009;
+						$('.mui-scroll-wrapper').scroll({
+							bounce: false,
+							indicators: true, //是否显示滚动条
+							deceleration: deceleration
+						});
+						$.ready(function() {
+							//循环初始化所有下拉刷新，上拉加载。
+							$.each(document.querySelectorAll('.mui-slider-group .mui-scroll'), function(index, pullRefreshEl) {
 
-							pageNums.push(0);
-							noDatas.push(false);
-							smallindex.push(0);
-							hasInits.push(false);
+								pageNums.push(0);
+								noDatas.push(false);
+								smallindex.push(0);
+								hasInits.push(false);
 
-							$(pullRefreshEl).pullToRefresh({
-								//								down: {
-								//									callback: function() {
-								//										var self = this;
-								//										setTimeout(function() {
-								//											var ul = self.element.querySelector('.mui-table-view');
-								//											getData((txlist[index].children)[0].id,false);
-								//											self.endPullDownToRefresh();
-								//										}, 1000);
-								//									}
-								//								},
-								up: {
-									callback: function() {
-										var self = this;
-										setTimeout(function() {
-											var ul = self.element.querySelector('.mui-table-view');
-											getData((txlist[index].children)[smallindex[index]].id, true);
-											self.endPullUpToRefresh(noDatas[index]);
-										}, 1000);
+								$(pullRefreshEl).pullToRefresh({
+									up: {
+										callback: function() {
+											var self = this;
+											setTimeout(function() {
+												var ul = self.element.querySelector('.mui-table-view');
+												getData((txlist[index].children)[smallindex[index]].id, self);
+												self.endPullUpToRefresh(noDatas[index]);
+											}, 1000);
+										}
 									}
-								}
+								});
 							});
 						});
-					});
-				})(mui);
+					})(mui);
 
-				getData((txlist[index].children)[smallindex[index]].id);
-				pageNums[index] = pageNums[index] + 1; //第一页第一次上拉pageNum为1
-				hasInits[0] = true;
+					getData((txlist[index].children)[smallindex[index]].id);
+					pageNums[index] = pageNums[index] + 1; //第一页第一次上拉pageNum应为1
+					hasInits[0] = true;
 
-			}, 1000);
+				}, 1000);
+			}
 
 			document.getElementById('slider').addEventListener('slide', function(e) {
 				index = e.detail.slideNumber;
@@ -177,11 +168,7 @@
 				}
 			});
 
-			function getData(id, isUp) {
-				if(!isUp) {
-					pageNums[index] = 0;
-					noDatas[index] = false;
-				}
+			function getData(id, lv) {
 				mui.get('http://www.wanandroid.com/article/list/' + pageNums[index] + '/json?cid=' + id, {}, function(data) {
 					if(data.errorCode == 0) {
 						if(data.data.datas.length == 0) {
@@ -191,6 +178,7 @@
 								getData((txlist[index].children)[smallindex[index]].id, true);
 							} else {
 								noDatas[index] = true;
+								lv.endPullUpToRefresh(true);
 							}
 						} else {
 							//渲染tabs
@@ -198,10 +186,8 @@
 							var f = Handlebars.compile(t);
 							var h = f(data.data.datas);
 							var self = document.querySelector('.mui-slider-group .mui-active .mui-scroll .mui-table-view');
-							self.innerHTML = isUp ? (self.innerHTML + h) : h;
-							if(isUp) {
-								pageNums[index]++;
-							}
+							self.innerHTML = self.innerHTML + h;
+							pageNums[index]++;
 						}
 					}
 				}, 'json');
@@ -216,15 +202,13 @@
 					}
 				});
 			}
-			
-			
-			
-			function  openSearch(){
+
+			function openSearch() {
 				mui.openWindow({
-						url: 'search.html',
-						id: 'search',
-					});
-		}
+					url: 'search.html',
+					id: 'search',
+				});
+			}
 		</script>
 
 	</body>

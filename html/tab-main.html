@@ -12,15 +12,16 @@
 		<script src="../js/vue.js"></script>
 		<link rel="stylesheet" href="../css/mui.min.css">
 		<link rel="stylesheet" href="../css/mine.css" />
-
+		<style>
+		</style>
 	</head>
 
 	<body>
-		<header class="mui-bar mui-bar-nav toolbar-bg">
+		<div class="mui-bar mui-bar-nav  toolbar-bg">
 			<h1 id="title" class="mui-title text-white">首页</h1>
 			<a class="mui-action-menu mui-icon mui-icon-search mui-pull-right text-white" onclick="openSearch()"></a>
-		</header>
-		<div class="mui-content white">
+		</div>
+		<div class="mui-content white" >
 			<!--轮播-->
 			<div id="slider" class="mui-slider  banner ">
 				<div id="banner" class="mui-slider-group mui-slider-loop">
@@ -157,7 +158,8 @@
 
 		function openSearch() {
 			mui.openWindow({
-				url: 'search.html',
+				url:'search.html',
+//				url: 'search.html',
 				id: 'search',
 			});
 		}

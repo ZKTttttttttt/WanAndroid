@@ -239,7 +239,6 @@
 
 		function getListData(isUp) {
 			setTimeout(function() {
-				console.log('http://gank.io/api/data/福利/10/' + count);
 				mui.get('http://gank.io/api/data/福利/10/' + count, {}, function(data) {
 					if(!data.error) {
 						if(isUp) {
