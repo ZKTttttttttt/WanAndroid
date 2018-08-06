@@ -62,7 +62,7 @@
 
 		<script id="listview" type="text/x-handlebars-template">
 			{{#each this}}
-			<li class="mui-table-view-cell" onclick="openDetail(this)" data-url='{{this.link}}'>
+			<li class="mui-table-view-cell" onclick="openDetail(this)" data-url='{{this.link}}'  data-title='{{this.title}}'>
 				<div class="mui-card">
 					<div class="mui-card-content mui-card-content-inner">
 						<div class="vertical">
@@ -198,7 +198,8 @@
 					url: 'pagedetail.html',
 					id: 'zstxdetail',
 					extras: {
-						url: item.getAttribute("data-url")
+						url: item.getAttribute("data-url"),
+						title:item.getAttribute("data-title")
 					}
 				});
 			}

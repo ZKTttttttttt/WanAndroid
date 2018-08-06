@@ -17,10 +17,10 @@
 	</head>
 
 	<body>
-		<div class="mui-bar mui-bar-nav  toolbar-bg">
+		<header class="mui-bar mui-bar-nav  toolbar-bg">
 			<h1 id="title" class="mui-title text-white">首页</h1>
 			<a class="mui-action-menu mui-icon mui-icon-search mui-pull-right text-white" onclick="openSearch()"></a>
-		</div>
+		</header>
 		<div class="mui-content white" >
 			<!--轮播-->
 			<div id="slider" class="mui-slider  banner ">
@@ -149,7 +149,8 @@
 						url: 'pagedetail.html',
 						id: 'newwindow',
 						extras: {
-							url: item.link
+							url: item.link,
+							title:item.title
 						}
 					});
 				}
@@ -159,7 +160,6 @@
 		function openSearch() {
 			mui.openWindow({
 				url:'search.html',
-//				url: 'search.html',
 				id: 'search',
 			});
 		}
